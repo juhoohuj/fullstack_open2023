@@ -13,13 +13,13 @@ const Part = (props) => {
   )
 }
 
-const Content = () => {
+const Content = (props) => {
 
   return (
     <div>
-      <Part part="Fundamentals of React" exercises="10" />
-      <Part part="Using props to pass data" exercises="7" />
-      <Part part="State of a component" exercises="14" />
+      <Part part={props.parts[0]} exercises={props.exercises[0]} />
+      <Part part={props.parts[1]} exercises={props.exercises[1]} />
+      <Part part={props.parts[2]} exercises={props.exercises[2]} />
     </div>
   )
 }
@@ -44,7 +44,7 @@ const App = () => {
   return (
     <div>
       <Header course={course} />
-      <Content />
+      <Content parts={[part1, part2, part3]} exercises={[exercises1, exercises2, exercises3]} />
       <Total first={exercises1} second={exercises2} third={exercises3} />
     </div>
   )

@@ -29,7 +29,6 @@ const App = () => {
     const copy = [...points]
     copy[selected] +=1
     setPoints([...copy])
-    console.log(points)
 
     const mostVotes = Math.max(...copy)
     const ind = copy.indexOf(mostVotes)

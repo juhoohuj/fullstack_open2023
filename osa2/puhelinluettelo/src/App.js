@@ -1,5 +1,37 @@
 import { useState } from 'react'
 
+const Persons = ({ persons }) => {
+  return (
+    <div>
+      {persons.map(person => <p key={person.name}>{person.name} {person.phone}</p>)}
+    </div>
+  )
+}
+
+const Filter = ({ filterTerm, setFilterTerm }) => {
+  return (
+    <div>
+      filter shown with <input type='text' onChange={e => setFilterTerm(e.target.value)} />
+    </div>
+  )
+}
+
+const PersonForm = ({ newName, setNewName, phoneNumber, setPhoneNumber, addPerson }) => {
+  return (
+    <form>
+      <div>
+        name: <input type='text' value={newName} onChange={(e) => setNewName(e.target.value)} />
+      </div>
+      <div>
+        phonenumber: <input type='text' value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+      <div/>
+        <button type="submit" onClick={addPerson}>add</button>
+      </div>
+    </form>
+  )
+}
+
+
 const App = () => {
   const [persons, setPersons] = useState([
     { name: 'Arto Hellas', phone: '040-123456' },
@@ -9,6 +41,9 @@ const App = () => {
   ])
   const [newName, setNewName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState()
+  const [filterTerm, setFilterTerm] = useState('')
+
+  const filterPersons = persons.filter(person => person.name.toLowerCase().includes(filterTerm.toLowerCase()))
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -26,36 +61,16 @@ const App = () => {
     setPhoneNumber('')
   }
 
-  const filterPersons = (event) => {
-    console.log(event.target.value)
-    const filteredPersons = persons.filter(person => person.name.toLowerCase().includes(event.target.value.toLowerCase()))
-    console.log(filteredPersons)
-    setPersons(filteredPersons)
-  }
-
-
 
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with <input type='text' onChange={filterPersons} />
-      </div>
-      <form>
-        <div>
-          name: <input type='text' value={newName} onChange={(e) => setNewName(e.target.value)} />
-        </div>
-        <div>
-          phonenumber: <input type='text' value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-        <div/>
-          <button type="submit" onClick={addPerson}>add</button>
-        </div>
-      </form>
+      <Filter filterTerm={filterTerm} setFilterTerm={setFilterTerm} />
+      <h2>Add a new</h2>
+      <PersonForm newName={newName} setNewName={setNewName} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} addPerson={addPerson} />
       <h2>Numbers</h2>
-      <div>
-        {persons.map(person => <div key={person.name}>{person.name} {person.phone}</div>)}
-      </div>
+      <Persons persons={filterPersons} />
     </div>
     
   )

@@ -33,12 +33,41 @@ const PersonForm = ({ newName, setNewName, phoneNumber, setPhoneNumber, addPerso
   )
 }
 
+const Notification = ({ message, notiColor }) => {
+
+  const error = {
+    color: notiColor,
+    fontStyle: 'italic',
+    fontSize: 16,
+    background: 'lightgrey',
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10
+  }
+
+  if (message === null) {
+    return null
+  }
+  return (
+    <div style={error}>
+      {message}
+    </div>
+  )
+
+}
+
+
+
+
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState()
   const [filterTerm, setFilterTerm] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [notiColor, setNotiColor] = useState('')
 
   useEffect(() => {
     pService
@@ -62,6 +91,7 @@ const App = () => {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         updatePerson(person.id)
       }
+      setNotiColor('green')
       return
     }
 
@@ -71,6 +101,11 @@ const App = () => {
         setPersons(persons.concat(response.data))
         setNewName('')
         setPhoneNumber('')
+        setNotiColor('green')
+        setErrorMessage(`Added ${newName}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
       })
   }
 
@@ -84,6 +119,17 @@ const App = () => {
         setPersons(persons.map(p => p.id !== id ? p : response.data))
         setNewName('')
         setPhoneNumber('')
+        setNotiColor('yellow')
+        setErrorMessage(`Updated ${newName}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      }).catch(error => {
+        setNotiColor('red')
+        setErrorMessage(`Information of ${person.name} has already been removed from server`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
       })
   }
 
@@ -94,8 +140,21 @@ const App = () => {
         .deleteOne(id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== id))
+          setNotiColor('red')
+          setErrorMessage(`Deleted ${person.name}`)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
+        }).catch(error => {
+          setNotiColor('red')
+          setErrorMessage(`Information of ${person.name} has already been removed from server`)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
         })
+
     }
+
   }
 
 
@@ -103,6 +162,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errorMessage} notiColor={notiColor}/>
       <Filter filterTerm={filterTerm} setFilterTerm={setFilterTerm} />
       <h2>Add a new</h2>
       <PersonForm newName={newName} setNewName={setNewName} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} addPerson={addPerson} />
@@ -113,5 +173,7 @@ const App = () => {
   )
 
 }
+
+
 
 export default App

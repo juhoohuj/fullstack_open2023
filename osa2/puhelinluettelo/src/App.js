@@ -73,7 +73,7 @@ const App = () => {
     pService
       .getAll()
       .then(response => {
-        setPersons(response.data)
+        setPersons(response)
       })
   }, [])
 
@@ -98,11 +98,19 @@ const App = () => {
     pService
       .create(personObject)
       .then(response => {
-        setPersons(persons.concat(response.data))
+        setPersons(persons.concat(response))
         setNewName('')
         setPhoneNumber('')
         setNotiColor('green')
         setErrorMessage(`Added ${newName}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
+      .catch(error => {
+        setNotiColor('red')
+        setErrorMessage(error.response.data.error)
+        (console.log(error.response.data))
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
@@ -116,7 +124,7 @@ const App = () => {
     pService
       .update(id, changedPerson)
       .then(response => {
-        setPersons(persons.map(p => p.id !== id ? p : response.data))
+        setPersons(persons.map(p => p.id !== id ? p : response))
         setNewName('')
         setPhoneNumber('')
         setNotiColor('yellow')

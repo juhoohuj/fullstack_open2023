@@ -1,16 +1,127 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-
 const api = supertest(app)
 
 
-test('returns the correct amount of blog posts in JSON format', async () => {
+const Blog = require('../models/blog')
+
+const initialBlogs = [
+    {
+        title: 'Testi',
+        author: 'Juuso',
+        url: 'www.google.fi',
+        likes: 6
+    },
+    {
+        title: 'Testi2',
+        author: 'MATTI',
+        url: 'www.google.fi',
+        likes: 7
+    }
+]
+
+beforeEach(async () => {
+    await Blog.deleteMany({})
+    let blogObject = new Blog(initialBlogs[0])
+    await blogObject.save()
+    blogObject = new Blog(initialBlogs[1])
+    await blogObject.save()
+})
+
+
+
+test('notes are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
+
+test('parameter id is defined', async () => {
     const response = await api.get('/api/blogs')
-    expect(response.body).toHaveLength(6)
+    expect(response.body[0].id).toBeDefined()
 })
 
+test('adding a blog works', async () => {
 
-afterAll(async () => {
-    await mongoose.connection.close()
+    const length = await api.get('/api/blogs').then(response => response.body.length)
+    
+    const newBlog = {
+        title: 'Testi2',
+        author: 'Juuso',
+        url: 'www.google.fi',
+        likes: 1
+    }
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type',/application\/json/)
+
+    const response = await api.get('/api/blogs')
+    expect(response.body.length).toBe(length+1)
 })
+
+test('likes is 0 if not defined', async () => {
+    const newBlog = {
+        title: 'Testi2',
+        author: 'Juuso',
+        url: 'www.google.fi'
+    }   
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type',/application\/json/)
+
+    const response = await api.get('/api/blogs')
+    const contents = response.body.map(r => r.likes)
+    expect(contents[contents.length-1]).toBe(0)
+})
+
+test('adding a blog without title or url should return 400 Bad Request', async () => {
+    const newBlogMissingFields = {
+      author: 'John Doe',
+      likes: 5,
+    };
+  
+    await api
+      .post('/api/blogs')
+      .send(newBlogMissingFields)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+  });
+
+test('deleting a blog works', async () => {
+    const response = await api.get('/api/blogs')
+    const id = response.body[0].id
+    await api
+        .delete(`/api/blogs/${id}`)
+        .expect(204)
+    const response2 = await api.get('/api/blogs')
+    expect(response2.body.length).toBe(initialBlogs.length-1)
+})
+
+test('updating a blog works', async () => {
+    const response = await api.get('/api/blogs')
+    const id = response.body[0].id
+    const newBlog = {
+        title: 'Testi2',
+        author: 'Juuso',
+        url: 'www.google.fi',
+        likes: 1
+    }
+    await api
+        .put(`/api/blogs/${id}`)
+        .send(newBlog)
+        .expect(200)
+    const response2 = await api.get('/api/blogs')
+    expect(response2.body[0].likes).toBe(newBlog.likes)
+})
+
+afterAll( async () => {
+    mongoose.connection.close()
+})
+

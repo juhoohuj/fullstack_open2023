@@ -1,11 +1,13 @@
 const app = require('express')()
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
 
 
 blogsRouter.get('/', (request, response) => {
     Blog
-      .find({})
+      .find({}).populate('user', { username: 1, name: 1 })
       .then(blogs => {
         response.json(blogs)
       })
@@ -19,8 +21,17 @@ blogsRouter.get('/', (request, response) => {
         return response.status(400).json({ error: 'Title and URL are required.' });
       }
   
-      const blog = new Blog({ title, author, url, likes });
+      const user = await User.findById("657d991c79b18ec1e1ab6ef0");
+      console.log(user)
+  
+      const blog = new Blog({ title, author, url, likes, user: user._id });
       const result = await blog.save();
+  
+
+      user.blogs = user.blogs.concat(result._id);
+  
+    
+      await user.save();
   
       response.status(201).json(result);
     } catch (error) {

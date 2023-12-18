@@ -3,6 +3,7 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const { userExtractor } = require('../utils/middleware')
 
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
@@ -21,22 +22,35 @@ blogsRouter.get('/', (request, response) => {
         response.json(blogs)
       })
   })
-  
-  blogsRouter.post('/', async (request, response) => {
-    try {
-      const { title, author, url, likes } = request.body;
 
-      const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-      if (!decodedToken.id) {
+  blogsRouter.get('/:id', (request, response) => {
+    Blog.findById(request.params.id)
+      .then(blog => {
+        if (blog) {
+          response.json(blog)
+        } else {
+          response.status(404).end()
+        }
+      })
+      .catch(error => {
+        response.status(400).send({ error: 'malformatted id' })
+      })
+  })
+  
+  blogsRouter.post('/', userExtractor, async (request, response) => {
+    try {
+      const { title, author, url, likes, } = request.body;
+
+      const user = request.user;
+
+      if (!user) {
         return response.status(401).json({ error: 'token invalid' })
       }
   
       if (!title || !url) {
         return response.status(400).json({ error: 'Title and URL are required.' });
       }
-  
-      const user = await User.findById(decodedToken.id)
-      console.log(user)
+
   
       const blog = new Blog({ title, author, url, likes, user: user._id });
       const result = await blog.save();
@@ -53,13 +67,28 @@ blogsRouter.get('/', (request, response) => {
     }
   });
 
-  blogsRouter.delete('/:id', async (request, response) => {
+  blogsRouter.delete('/:id', userExtractor, async (request, response) => {
+
     try {
-      const blog = await Blog.findByIdAndDelete(request.params.id);
+
+      const user = request.user
+      console.log(user)
+      const blog = await Blog.findById(request.params.id);
+      console.log(blog)
+
+      if (!user) {
+        return response.status(401).json({ error: 'token invalid' })
+      }
+
+      if (user.id.toString() !== blog.user.toString()) {
+        return response.status(401).json({ error: 'token invalid' })
+      }
   
       if (!blog) {
         return response.status(404).json({ error: 'Blog not found' });
       }
+
+      await Blog.findByIdAndDelete(request.params.id)
   
       response.status(204).end();
     } catch (error) {

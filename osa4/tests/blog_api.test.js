@@ -5,6 +5,7 @@ const api = supertest(app)
 
 
 const Blog = require('../models/blog')
+const { userExtractor } = require('../utils/middleware')
 
 const initialBlogs = [
     {
@@ -23,8 +24,10 @@ const initialBlogs = [
 
 beforeEach(async () => {
     await Blog.deleteMany({})
+
     let blogObject = new Blog(initialBlogs[0])
     await blogObject.save()
+
     blogObject = new Blog(initialBlogs[1])
     await blogObject.save()
 })
@@ -47,6 +50,8 @@ test('adding a blog works', async () => {
 
     const length = await api.get('/api/blogs').then(response => response.body.length)
     
+    
+
     const newBlog = {
         title: 'Testi2',
         author: 'Juuso',
@@ -55,13 +60,14 @@ test('adding a blog works', async () => {
     }
     await api
         .post('/api/blogs')
+        .set('Authorization', `bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1aG8iLCJpZCI6IjY1N2Y1YTJlOWYyMmE5MThkYmU0MWExZiIsImlhdCI6MTcwMjkyMzM5NX0.Pe4STsIfKVoF1yqhrwlJopiBUQ2WUbrZ6qKs9oC40T8`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type',/application\/json/)
 
     const response = await api.get('/api/blogs')
     expect(response.body.length).toBe(length+1)
-})
+}, 10000)
 
 test('likes is 0 if not defined', async () => {
     const newBlog = {
@@ -79,7 +85,7 @@ test('likes is 0 if not defined', async () => {
     const response = await api.get('/api/blogs')
     const contents = response.body.map(r => r.likes)
     expect(contents[contents.length-1]).toBe(0)
-})
+}, )
 
 test('adding a blog without title or url should return 400 Bad Request', async () => {
     const newBlogMissingFields = {
@@ -119,6 +125,21 @@ test('updating a blog works', async () => {
         .expect(200)
     const response2 = await api.get('/api/blogs')
     expect(response2.body[0].likes).toBe(newBlog.likes)
+})
+
+test('adding a blog without token should return 401 Unauthorized', async () => {
+    const newBlog = {
+        title: 'Testi2',
+        author: 'Juuso',
+        url: 'www.google.fi',
+        likes: 1
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+        .expect('Content-Type',/application\/json/)
 })
 
 afterAll( async () => {

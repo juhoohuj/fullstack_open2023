@@ -24,7 +24,11 @@ mongoose.connect(config.MONGODB_URI)
   })
 
 
-
+app.use(middleware.tokenExtractor)
+app.use(middleware.requestLogger)
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
+app.use(middleware.userExtractor)
 
 app.use(cors())
 app.use(express.json())

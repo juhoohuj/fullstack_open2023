@@ -42,6 +42,7 @@ beforeEach(async () => {
     username: user.username,
     password: user.password,
   });
+  
   userToken = loginResponse.body.token;
 
   // Save initial blogs
@@ -77,7 +78,7 @@ test('adding a blog works', async () => {
     }
     await api
         .post('/api/blogs')
-        .set('Authorization', `bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1aG8iLCJpZCI6IjY1N2Y1YTJlOWYyMmE5MThkYmU0MWExZiIsImlhdCI6MTcwMjkyMzM5NX0.Pe4STsIfKVoF1yqhrwlJopiBUQ2WUbrZ6qKs9oC40T8`)
+        .set('Authorization', `Bearer ${userToken}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type',/application\/json/)
@@ -146,18 +147,18 @@ test('updating a blog works', async () => {
 
 test('adding a blog without token should return 401 Unauthorized', async () => {
     const newBlog = {
-        title: 'Testi2',
-        author: 'Juuso',
-        url: 'www.google.fi',
-        likes: 1
-    }
+      title: 'Testi2',
+      author: 'Aleksi',
+      url: 'www.com',
+      likes: 4,
+    };
 
     await api
-        .post('/api/blogs')
-        .send(newBlog)
-        .expect(401)
-        .expect('Content-Type',/application\/json/)
-})
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/);
+});
 
 afterAll( async () => {
     mongoose.connection.close()

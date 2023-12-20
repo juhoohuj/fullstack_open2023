@@ -62,7 +62,7 @@ blogsRouter.get('/', (request, response) => {
     }
   });
 
-  blogsRouter.delete('/:id', async (request, response) => {
+  blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
 
     try {
 

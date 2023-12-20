@@ -2,10 +2,11 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
-
-
 const Blog = require('../models/blog')
-const { userExtractor } = require('../utils/middleware')
+const User = require('../models/user')
+
+const { tokenExtractor } = require('../utils/middleware')
+
 
 const initialBlogs = [
     {
@@ -22,15 +23,33 @@ const initialBlogs = [
     }
 ]
 
+let userToken; // Variable to store the user token
+
 beforeEach(async () => {
-    await Blog.deleteMany({})
+  await Blog.deleteMany({});
+  await User.deleteMany({});
 
-    let blogObject = new Blog(initialBlogs[0])
-    await blogObject.save()
+  // Create a test user
+  const user = {
+    username: 'testuser',
+    name: 'Test User',
+    password: 'testpassword',
+  };
+  await api.post('/api/users').send(user);
 
-    blogObject = new Blog(initialBlogs[1])
-    await blogObject.save()
-})
+  // Login and obtain the token
+  const loginResponse = await api.post('/api/login').send({
+    username: user.username,
+    password: user.password,
+  });
+  userToken = loginResponse.body.token;
+
+  // Save initial blogs
+  for (const blog of initialBlogs) {
+    const blogObject = new Blog(blog);
+    await blogObject.save();
+  }
+});
 
 
 
@@ -50,8 +69,6 @@ test('adding a blog works', async () => {
 
     const length = await api.get('/api/blogs').then(response => response.body.length)
     
-    
-
     const newBlog = {
         title: 'Testi2',
         author: 'Juuso',

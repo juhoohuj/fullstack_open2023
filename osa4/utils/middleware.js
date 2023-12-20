@@ -4,13 +4,34 @@ const User = require('../models/user')
 
 
 
-const tokenExtractor = (request, response, next) => {
-    const authorization = request.get('authorization')
-    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-        request.token = authorization.substring(7)
+const userExtractor = (request, response, next) => {
+    const authorization = request.get('authorization');
+  
+    if (!authorization || !authorization.toLowerCase().startsWith('bearer ')) {
+      // No token found, but that's okay, continue to the next middleware or route
+      return next();
     }
-    next()
-}
+  
+    const token = authorization.substring(7);
+  
+    try {
+      const decodedToken = jwt.verify(token, process.env.SECRET);
+      request.user = decodedToken; // Assuming your user information is stored in the token payload
+      if (!decodedToken.id) {
+        return response.status(401).json({ error: 'Token invalid' });
+      }
+    } catch (error) {
+      return response.status(401).json({ error: 'Token invalid or expired' });
+    }
+  
+    // Token is valid, continue to the next middleware or route
+    next();
+  };
+  
+  module.exports = {
+    userExtractor,
+  };
+
 
 const requestLogger = (request, response, next) => {
     console.log('Method:', request.method)
@@ -20,9 +41,6 @@ const requestLogger = (request, response, next) => {
     next()
 }
 
-const unknownEndpoint = (request, response) => {
-    response.status(404).send({ error: 'unknown endpoint' })
-}
 
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
@@ -36,20 +54,13 @@ const errorHandler = (error, request, response, next) => {
     next(error)
 }
 
-const userExtractor = async (request, response, next) => {
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    if (!decodedToken.id) {
-        return response.status(401).json({ error: 'token invalid' })
-    }
-    const user = await User.findById(decodedToken.id)
-    request.user = user
-    next()
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
 }
+
 
 module.exports = {
     requestLogger,
-    unknownEndpoint,
     errorHandler,
-    tokenExtractor,
     userExtractor
 }

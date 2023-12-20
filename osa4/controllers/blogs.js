@@ -3,15 +3,9 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
-const { userExtractor } = require('../utils/middleware')
+const middleware = require('../utils/middleware')
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
+
 
 
 
@@ -37,11 +31,11 @@ blogsRouter.get('/', (request, response) => {
       })
   })
   
-  blogsRouter.post('/', userExtractor, async (request, response) => {
+  blogsRouter.post('/', middleware.userExtractor , async (request, response) => {
     try {
       const { title, author, url, likes, } = request.body;
 
-      const user = request.user;
+      const user = request.user
 
       if (!user) {
         return response.status(401).json({ error: 'token invalid' })
@@ -53,21 +47,22 @@ blogsRouter.get('/', (request, response) => {
 
   
       const blog = new Blog({ title, author, url, likes, user: user._id });
+      console.log(blog)
       const result = await blog.save();
-  
 
-      user.blogs = user.blogs.concat(result._id);
+      console.log(result)
   
+      await User.findByIdAndUpdate(user.id, { $push: { blogs: result._id } });
     
-      await user.save();
   
       response.status(201).json(result);
     } catch (error) {
+      console.log(error)
       response.status(500).json({ error: 'Internal Server Error' });
     }
   });
 
-  blogsRouter.delete('/:id', userExtractor, async (request, response) => {
+  blogsRouter.delete('/:id', async (request, response) => {
 
     try {
 

@@ -2,37 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
+import LoginForm from './components/LoginForm';
+import BlogForm from './components/BlogForm';
+import Notification from './components/Notification';
 
-const LoginForm = ({ handleLogin, isLoggedIn, username, password, setUsername, setPassword }) => {
-  if (isLoggedIn) {
-    return null; // Don't render the login form if the user is logged in
-  }
 
-  return (
-    <form onSubmit={handleLogin}>
-      <h2>Login</h2>  
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password" 
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
-  );
-};
 
 const Blogs = ({ isLoggedIn, blogs }) => {
   if (!isLoggedIn) {
@@ -48,73 +22,7 @@ const Blogs = ({ isLoggedIn, blogs }) => {
   );
 };
 
-const BlogForm = ({ isLoggedIn, user }) => {
 
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
-
-
-
-  const handleCreateBlog = async (event) => {
-    event.preventDefault();
-  
-    try {
-      const blog = await blogService.create({
-        title,
-        author,
-        url,
-        user: user.id,
-      });
-  
-      setTitle('');
-      setAuthor('');
-      setUrl('');
-    } catch (exception) {
-      console.log('exception', exception);
-    }
-  }
-
-  if (!isLoggedIn) {
-    return null;
-  }
-
-  return (
-    <form onSubmit={handleCreateBlog}>
-      <h2>Create new</h2>
-      <div>
-        <div>
-          title:
-          <input
-            type="text"
-            value={title}
-            name="Title"
-            onChange={({ target }) => setTitle(target.value)}
-          />
-        </div>
-        <div>
-          author:
-          <input
-            type="text"
-            value={author}
-            name="Author"
-            onChange={({ target }) => setAuthor(target.value)}
-          />
-        </div>
-        <div>
-          url:
-          <input
-            type="text"
-            value={url}
-            name="Url"
-            onChange={({ target }) => setUrl(target.value)}
-          />
-        </div>
-      </div>
-      <button type="submit">create</button>
-    </form>
-  );
-};
 
 
 
@@ -124,6 +32,11 @@ const App = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [noti, setNoti] = useState(null);
+  const [notiColor, setNotiColor] = useState(null)
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [url, setUrl] = useState('');
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
@@ -138,6 +51,7 @@ const App = () => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, [loggedInUser]);
 
+  //login
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -147,27 +61,81 @@ const App = () => {
         password,
       });
 
+
       window.localStorage.setItem('loggedBloglistUser', JSON.stringify(user));
 
       setLoggedInUser(user);
       blogService.setToken(user.token);
+      setNoti(`Logged in as ${user.username}`);
+      setNotiColor('green');
+      setTimeout(() => {
+        setNoti(null);
+      }, 5000);
 
       setUsername('');
       setPassword('');
 
     } catch (exception) {
       console.log('exception', exception);
+      setNoti('Wrong username or password');
+      setNotiColor('red');
+      setTimeout(() => {
+        setNoti(null);
+      }, 5000);
     }
   };
 
+  //logout
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBloglistUser');
     setLoggedInUser(null);
     blogService.setToken(null);
+    setNoti('Logged out');
+    setNotiColor('green');
+    setTimeout(() => {
+      setNoti(null);
+    }, 5000);
   };
 
+  //create blog
+  const handleCreateBlog = async (event) => {
+    event.preventDefault();
+  
+    try {
+      const blog = await blogService.create({
+        title,
+        author,
+        url,
+        user: loggedInUser.id,
+      });
+      setBlogs(blogs.concat(blog));
+
+      setNoti(`a new blog ${blog.title} by ${blog.author} added`);
+      setNotiColor('green');
+      setTimeout(() => {
+        setNoti(null);
+      }, 5000);
+
+
+      setTitle('');
+      setAuthor('');
+      setUrl('');
+    } catch (exception) {
+      console.log('exception', exception);
+      setNoti('Error creating blog');
+      setNotiColor('red');
+      setTimeout(() => {
+        setNoti(null);
+      }, 5000);   
+    }
+  }
+
+
   return (
+
     <div>
+
+      <Notification message={noti} noticolor={notiColor} />
       <LoginForm
         handleLogin={handleLogin}
         isLoggedIn={loggedInUser !== null}
@@ -176,7 +144,10 @@ const App = () => {
         setUsername={setUsername}
         setPassword={setPassword}
       />
+
+
       <h2>Blogs listed</h2>
+
       <Blogs isLoggedIn={loggedInUser !== null} blogs={blogs} />
       {loggedInUser && (
         <div>
@@ -185,7 +156,16 @@ const App = () => {
         </div>
       )}
 
-      <BlogForm isLoggedIn={loggedInUser !== null} user={loggedInUser} />
+      <BlogForm 
+        isLoggedIn={loggedInUser !== null}
+        title={title}
+        setTitle={setTitle}
+        author={author}
+        setAuthor={setAuthor}
+        url={url}
+        setUrl={setUrl}
+        fn={handleCreateBlog}
+      />
 
     </div>
   );

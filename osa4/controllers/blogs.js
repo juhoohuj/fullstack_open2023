@@ -9,13 +9,12 @@ const middleware = require('../utils/middleware')
 
 
 
-blogsRouter.get('/', (request, response) => {
-    Blog
-      .find({}).populate('user', { username: 1, name: 1 })
-      .then(blogs => {
-        response.json(blogs)
-      })
+blogsRouter.get('/', async (request, response) => {
+    const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
+    response.json(blogs.map(blog => blog.toJSON()))
   })
+
+
 
   blogsRouter.get('/:id', (request, response) => {
     Blog.findById(request.params.id)
@@ -33,11 +32,10 @@ blogsRouter.get('/', (request, response) => {
   
   blogsRouter.post('/', middleware.userExtractor , async (request, response) => {
     try {
-      const { title, author, url, likes, } = request.body;
+      const creator = request.user
+      const { title, author, url, likes, user } = request.body;
 
-      const user = request.user
-
-      if (!user) {
+      if (!creator) {
         return response.status(401).json({ error: 'token invalid' })
       }
   
@@ -45,14 +43,15 @@ blogsRouter.get('/', (request, response) => {
         return response.status(400).json({ error: 'Title and URL are required.' });
       }
 
+      console.log(`id is: ${creator.id}`)
   
-      const blog = new Blog({ title, author, url, likes, user: user._id });
+      const blog = new Blog({ title, author, url, likes, user: creator.id});
       console.log(blog)
       const result = await blog.save();
 
       console.log(result)
   
-      await User.findByIdAndUpdate(user.id, { $push: { blogs: result._id } });
+      await User.findByIdAndUpdate(creator.id, { $push: { blogs: result._id } });
     
   
       response.status(201).json(result);

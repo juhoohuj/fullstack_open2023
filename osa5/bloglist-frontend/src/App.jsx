@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
 import LoginForm from './components/LoginForm';
 import BlogForm from './components/BlogForm';
 import Notification from './components/Notification';
+import Togglable from './components/Togglable';
 
 
 
@@ -23,10 +24,6 @@ const Blogs = ({ isLoggedIn, blogs }) => {
 };
 
 
-
-
-
-
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
@@ -34,9 +31,10 @@ const App = () => {
   const [password, setPassword] = useState('');
   const [noti, setNoti] = useState(null);
   const [notiColor, setNotiColor] = useState(null)
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
+  
+
+  const blogFormRef = useRef();
+
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
@@ -98,28 +96,21 @@ const App = () => {
   };
 
   //create blog
-  const handleCreateBlog = async (event) => {
-    event.preventDefault();
-  
+  const handleCreateBlog = async (blogObject) => {
+    
     try {
-      const blog = await blogService.create({
-        title,
-        author,
-        url,
-        user: loggedInUser.id,
-      });
-      setBlogs(blogs.concat(blog));
-
-      setNoti(`a new blog ${blog.title} by ${blog.author} added`);
+      blogService.create(blogObject);
+      blogFormRef.current.toggleVisibility()
+      setBlogs(blogs.concat(blogObject));
+      setNoti(`a new blog ${blogObject.title} by ${blogObject.author} added`);
       setNotiColor('green');
       setTimeout(() => {
         setNoti(null);
       }, 5000);
 
+    
+        
 
-      setTitle('');
-      setAuthor('');
-      setUrl('');
     } catch (exception) {
       console.log('exception', exception);
       setNoti('Error creating blog');
@@ -156,16 +147,20 @@ const App = () => {
         </div>
       )}
 
-      <BlogForm 
-        isLoggedIn={loggedInUser !== null}
-        title={title}
-        setTitle={setTitle}
-        author={author}
-        setAuthor={setAuthor}
-        url={url}
-        setUrl={setUrl}
-        fn={handleCreateBlog}
-      />
+      
+      <Togglable
+        buttonLabel="Create new blog" 
+        isLoggedIn={loggedInUser!==null} 
+        ref={blogFormRef}
+      >
+
+        <BlogForm
+          fn={handleCreateBlog}
+          isLoggedIn={loggedInUser !== null}
+          user={loggedInUser}
+        />
+
+      </Togglable>
 
     </div>
   );

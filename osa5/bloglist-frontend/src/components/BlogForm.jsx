@@ -1,9 +1,29 @@
 import React, { useState } from 'react';
-import blogService from '../services/blogs';
 
 
 
-const BlogForm = ({ isLoggedIn, title, author, url, setTitle, setAuthor, setUrl, fn }) => {
+const BlogForm = ({ isLoggedIn, fn, user }) => {
+
+  const [title, setTitle] = useState("")
+  const [author, setAuthor] = useState("")
+  const [url, setUrl] = useState("")
+
+  const addBlog = (event) => {
+    event.preventDefault();
+
+    fn({
+      title: title,
+      author: author,
+      url: url,
+      user: user.id
+    });
+
+    
+    setTitle("");
+    setAuthor("");
+    setUrl("");
+  }
+
 
 
     if (!isLoggedIn) {
@@ -11,7 +31,7 @@ const BlogForm = ({ isLoggedIn, title, author, url, setTitle, setAuthor, setUrl,
     }
   
     return (
-      <form onSubmit={fn}>
+      <form onSubmit={addBlog}>
         <h2>Create new</h2>
         <div>
           <div>

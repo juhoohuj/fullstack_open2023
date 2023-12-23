@@ -59,7 +59,6 @@ const App = () => {
         password,
       });
 
-
       window.localStorage.setItem('loggedBloglistUser', JSON.stringify(user));
 
       setLoggedInUser(user);
@@ -99,9 +98,10 @@ const App = () => {
   const handleCreateBlog = async (blogObject) => {
     
     try {
-      blogService.create(blogObject);
+      await blogService.create(blogObject);
       blogFormRef.current.toggleVisibility()
-      setBlogs(blogs.concat(blogObject));
+      console.log('blogObject', blogObject);
+      setBlogs( await blogService.getOne(blogObject.id) );
       setNoti(`a new blog ${blogObject.title} by ${blogObject.author} added`);
       setNotiColor('green');
       setTimeout(() => {
@@ -120,6 +120,7 @@ const App = () => {
       }, 5000);   
     }
   }
+
 
 
   return (

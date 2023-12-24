@@ -101,7 +101,8 @@ const App = () => {
       await blogService.create(blogObject);
       blogFormRef.current.toggleVisibility()
       console.log('blogObject', blogObject);
-      setBlogs( await blogService.getOne(blogObject.id) );
+      const updatedBlogs = await blogService.getAll();
+      setBlogs(updatedBlogs);
       setNoti(`a new blog ${blogObject.title} by ${blogObject.author} added`);
       setNotiColor('green');
       setTimeout(() => {

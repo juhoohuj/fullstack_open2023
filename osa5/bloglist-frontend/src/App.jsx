@@ -109,8 +109,7 @@ const App = () => {
         setNoti(null);
       }, 5000);
 
-    
-        
+      
 
     } catch (exception) {
       console.log('exception', exception);
@@ -122,6 +121,16 @@ const App = () => {
     }
   }
 
+
+  const handleLike = async (blog) => {
+    const updatedBlog = await blogService.update(blog.id, {
+      ...blog,
+      likes: blog.likes + 1,
+    });
+    setBlogs(
+      blogs.map((blog) => (blog.id !== updatedBlog.id ? blog : updatedBlog))
+    );
+  }
 
 
   return (
@@ -141,7 +150,7 @@ const App = () => {
 
       <h2>Blogs listed</h2>
 
-      <Blogs isLoggedIn={loggedInUser !== null} blogs={blogs} />
+      <Blogs isLoggedIn={loggedInUser !== null} blogs={blogs}/>
       {loggedInUser && (
         <div>
           <p>Logged in as: {loggedInUser.username}</p>

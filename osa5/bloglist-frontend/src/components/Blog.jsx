@@ -17,6 +17,10 @@ const Blog = ({ blog, handleLike }) => {
     background: 'lightgrey'
   }
 
+  const likeHandler = () => {
+    handleLike(blog.id)
+  }
+
   
 
   return(
@@ -29,7 +33,7 @@ const Blog = ({ blog, handleLike }) => {
         <p>Title: {blog.title}</p>
         <p>Author: {blog.author}</p>
         <p>Url: {blog.url}</p>
-        <p>Likes: {blog.likes} <button onClick={handleLike}>Like </button></p>
+        <p>Likes: {blog.likes} <button onClick={likeHandler}>Like </button></p>
         <p>Added by: {blog.user.name}</p>
         <button onClick={() => setVisible(false)}>hide</button>
       </div>

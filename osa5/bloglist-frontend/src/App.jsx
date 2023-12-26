@@ -9,7 +9,7 @@ import Togglable from './components/Togglable';
 
 
 
-const Blogs = ({ isLoggedIn, blogs, handleLike }) => {
+const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   if (!isLoggedIn) {
     return <p>Not logged in</p>;
   }
@@ -17,7 +17,7 @@ const Blogs = ({ isLoggedIn, blogs, handleLike }) => {
   return (
     <div>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} handleLike={handleLike} />
+        <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete} />
       ))}
     </div>
   );
@@ -35,6 +35,11 @@ const App = () => {
 
   const blogFormRef = useRef();
 
+  function sortBlogs(blogs) {
+    const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes);
+    setBlogs(sortedBlogs);
+  }
+
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
@@ -46,7 +51,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
+    blogService.getAll().then((blogs) => sortBlogs(blogs));
   }, [loggedInUser]);
 
   //login
@@ -101,7 +106,7 @@ const App = () => {
       await blogService.create(blogObject);
       blogFormRef.current.toggleVisibility()
       console.log('blogObject', blogObject);
-      const updatedBlogs = await blogService.getAll();
+      const updatedBlogs = await blogService.getAll().then((blogs) => sortBlogs(blogs));
       setBlogs(updatedBlogs);
       setNoti(`a new blog ${blogObject.title} by ${blogObject.author} added`);
       setNotiColor('green');
@@ -129,9 +134,23 @@ const App = () => {
     try {
       await blogService.update(blogId, updatedBlog);
       const updatedBlogs = await blogService.getAll();
-      setBlogs(updatedBlogs);
+      sortBlogs(updatedBlogs);
     } catch (exception) {
       console.log('exception', exception);
+    }
+  }
+
+  const handleDelete = async (blogId) => { 
+    const blog = blogs.find((blog) => blog.id === blogId);
+    const result = window.confirm(`Delete ${blog.title} by ${blog.author}?`);
+    if (result) {
+      try {
+        await blogService.deleteOne(blogId);
+        const updatedBlogs = await blogService.getAll();
+        sortBlogs(updatedBlogs);
+      } catch (exception) {
+        console.log('exception', exception);
+      }
     }
   }
 
@@ -153,7 +172,7 @@ const App = () => {
 
       <h2>Blogs listed</h2>
 
-      <Blogs isLoggedIn={loggedInUser !== null} blogs={blogs} handleLike={handleLike}/>
+      <Blogs isLoggedIn={loggedInUser !== null} blogs={blogs} handleLike={handleLike} handleDelete={handleDelete}/>
       {loggedInUser && (
         <div>
           <p>Logged in as: {loggedInUser.username}</p>

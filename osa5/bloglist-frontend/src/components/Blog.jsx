@@ -25,7 +25,7 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
     handleDelete(blog.id)
   }
 
-  
+
 
   return(
     <div style={blogStyle}>

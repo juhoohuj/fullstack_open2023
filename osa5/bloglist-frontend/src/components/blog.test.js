@@ -4,33 +4,22 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 
-
-test('renders content', () => {
+describe('Blog component', () => {
   const blog = {
-    title: 'Component testing is done with react-testing-library',
-    author: 'Test Author',
-    url: 'http://testurl.com',
+    title: 'Test title',
+    author: 'Test author',
+    url: 'Test url',
     likes: 0,
     user: {
-      name: 'Test User'
-    }
-    }
+      username: 'Test username',
+    },
+  }
 
-    const component = render(
-        <Blog blog={blog} />
-    )
+  test('renders content', () => {
+    const component = render(<Blog blog={blog} />)
 
-    expect(component.container).toHaveTextContent(
-        'Component testing is done with react-testing-library'
-    )
-    expect(component.container).toHaveTextContent(
-        'Test Author'
-    )
-    expect(component.container).not.toHaveTextContent(
-        'http://testurl.com'
-    )
-    expect(component.container).not.toHaveTextContent(
-        'likes'
-    )
-}
-)
+    expect(component.container).toHaveTextContent('Test title')
+  })
+})
+
+

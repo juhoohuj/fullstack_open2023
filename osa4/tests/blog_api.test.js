@@ -13,13 +13,22 @@ const initialBlogs = [
         title: 'Testi',
         author: 'Juuso',
         url: 'www.google.fi',
-        likes: 6
+        likes: 6,
+        user: {
+            username: 'testuser',
+            name: 'Test User',
+        },
     },
+
     {
         title: 'Testi2',
         author: 'MATTI',
         url: 'www.google.fi',
-        likes: 7
+        likes: 7,
+        user: {
+            username: 'testuser',
+            name: 'Test User',
+        },
     }
 ]
 

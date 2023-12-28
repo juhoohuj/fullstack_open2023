@@ -106,8 +106,8 @@ const App = () => {
       await blogService.create(blogObject)
       blogFormRef.current.toggleVisibility()
       console.log('blogObject', blogObject)
-      const updatedBlogs = await blogService.getAll().then((blogs) => sortBlogs(blogs))
-      setBlogs(updatedBlogs)
+      const updatedBlogs = await blogService.getAll()
+      sortBlogs(updatedBlogs)
       setNoti(`a new blog ${blogObject.title} by ${blogObject.author} added`)
       setNotiColor('green')
       setTimeout(() => {
@@ -181,18 +181,8 @@ const App = () => {
       )}
 
 
-      <Togglable
-        buttonLabel="Create new blog"
-        isLoggedIn={loggedInUser!==null}
-        ref={blogFormRef}
-      >
-
-        <BlogForm
-          fn={handleCreateBlog}
-          isLoggedIn={loggedInUser !== null}
-          user={loggedInUser}
-        />
-
+      <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
+        <BlogForm fn={handleCreateBlog} isLoggedIn={loggedInUser !== null} user={loggedInUser} />
       </Togglable>
 
     </div>

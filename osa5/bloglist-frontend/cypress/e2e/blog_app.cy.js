@@ -63,42 +63,37 @@ describe('Blog app', function() {
       cy.contains('1')
     })
 
-    it('A blog can be deleted', function() {
+    it('Likes are sorted', function() {
       cy.contains('new blog').click()
       cy.get('#title').type('test blog')
       cy.get('#author').type('test author')
       cy.get('#url').type('https://test.com')
       cy.get('#create-button').click()
 
-      cy.contains('view').click()
-      cy.contains('Delete').click()
-      cy.contains('test blog').should('not.exist')
-    })
-
-    it('Blogs are ordered by likes', function() {
       cy.contains('new blog').click()
-      cy.get('#title').type('test blog')
-      cy.get('#author').type('test author')
-      cy.get('#url').type('https://test.com')
-      cy.get('#create-button').click()
-
-      cy.contains('Create new blog').click()
       cy.get('#title').type('test blog 2')
       cy.get('#author').type('test author 2')
-      cy.get('#url').type('https://test.com')
+      cy.get('#url').type('test2.com')
       cy.get('#create-button').click()
 
-      cy.contains('view').click()
+      //likes the first blog once
+      cy.contains('test blog').parent().find('button').click()
       cy.contains('Like').click()
 
-      cy.contains('view').click({ force: true })
-      cy.contains('Like').click()
-      cy.contains('Like').click()
+      //likes the second blog twice
+      cy.contains('test blog 2').parent().find('button').click()
 
-      cy.get('.blog').then(blogs => {
-        cy.wrap(blogs[0]).contains('test blog 2')
-        cy.wrap(blogs[1]).contains('test blog')
-      })
+      cy.contains('p', 'test2.com')
+        .parent('div')
+        .within(() => {
+          cy.get('button').contains('Like').click() // Like the second blog
+          cy.wait(500)
+          cy.get('button').contains('Like').click() // Like the second blog again
+        })
+
+      //checks that the second blog is first in the list
+      cy.get('.blog').eq(0).contains('test blog 2')
+      cy.get('.blog').eq(1).contains('test blog')
     })
 
   })

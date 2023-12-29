@@ -7,8 +7,6 @@ import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 
-
-
 const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   if (!isLoggedIn) {
     return <p>Not logged in</p>
@@ -17,12 +15,16 @@ const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   return (
     <div>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          handleLike={handleLike}
+          handleDelete={handleDelete}
+        />
       ))}
     </div>
   )
 }
-
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -32,14 +34,12 @@ const App = () => {
   const [noti, setNoti] = useState(null)
   const [notiColor, setNotiColor] = useState(null)
 
-
   const blogFormRef = useRef()
 
   function sortBlogs(blogs) {
     const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
     setBlogs(sortedBlogs)
   }
-
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser')
@@ -76,7 +76,6 @@ const App = () => {
 
       setUsername('')
       setPassword('')
-
     } catch (exception) {
       console.log('exception', exception)
       setNoti('Wrong username or password')
@@ -101,7 +100,6 @@ const App = () => {
 
   //create blog
   const handleCreateBlog = async (blogObject) => {
-
     try {
       await blogService.create(blogObject)
       blogFormRef.current.toggleVisibility()
@@ -113,9 +111,6 @@ const App = () => {
       setTimeout(() => {
         setNoti(null)
       }, 5000)
-
-
-
     } catch (exception) {
       console.log('exception', exception)
       setNoti('Error creating blog')
@@ -125,7 +120,6 @@ const App = () => {
       }, 5000)
     }
   }
-
 
   const handleLike = async (blogId) => {
     const blog = blogs.find((blog) => blog.id === blogId)
@@ -154,37 +148,46 @@ const App = () => {
     }
   }
 
-
   return (
-
     <div>
+      <div>
+        <Notification message={noti} noticolor={notiColor} />
+        <LoginForm
+          handleLogin={handleLogin}
+          isLoggedIn={loggedInUser !== null}
+          username={username}
+          password={password}
+          setUsername={setUsername}
+          setPassword={setPassword}
+        />
+      </div>
+      <div>
+        <h2>blogs</h2>
+        <p>
+          {loggedInUser !== null && (
+            <span>
+              {loggedInUser.name} logged in{' '}
+              <button onClick={handleLogout}>Logout</button>
+            </span>
+          )}
+        </p>
+        <Blogs
+          isLoggedIn={loggedInUser !== null}
+          blogs={blogs}
+          handleLike={handleLike}
+          handleDelete={handleDelete}
+        />
+      </div>
 
-      <Notification message={noti} noticolor={notiColor} />
-      <LoginForm
-        handleLogin={handleLogin}
-        isLoggedIn={loggedInUser !== null}
-        username={username}
-        password={password}
-        setUsername={setUsername}
-        setPassword={setPassword}
-      />
-
-
-      <h2>Blogs listed</h2>
-
-      <Blogs isLoggedIn={loggedInUser !== null} blogs={blogs} handleLike={handleLike} handleDelete={handleDelete}/>
-      {loggedInUser && (
-        <div>
-          <p>Logged in as: {loggedInUser.username}</p>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      )}
-
-
-      <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
-        <BlogForm fn={handleCreateBlog} isLoggedIn={loggedInUser !== null} user={loggedInUser} />
-      </Togglable>
-
+      <div>
+        <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
+          <BlogForm
+            fn={handleCreateBlog}
+            isLoggedIn={loggedInUser !== null}
+            user={loggedInUser}
+          />
+        </Togglable>
+      </div>
     </div>
   )
 }

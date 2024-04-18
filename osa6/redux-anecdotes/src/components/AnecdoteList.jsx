@@ -9,23 +9,29 @@ const AnecdoteList = () => {
     }
     return anecdotes.filter(anecdote => anecdote.content.toLowerCase().includes(filter.toLowerCase()))
   })
+
   
   const dispatch = useDispatch()
 
+  const voteFor = (anecdote) => {
+    dispatch(vote(anecdote.id))
+  }
+
   return (
-    <div>
+    <>
+      <h2>Anecdotes</h2>
       {anecdotes.map(anecdote =>
         <div key={anecdote.id}>
           <div>
             {anecdote.content}
           </div>
           <div>
-            has {anecdote.votes} 
-            <button onClick={() => dispatch(vote(anecdote.id))}>vote</button>
+            has {anecdote.votes}
+            <button onClick={() => voteFor(anecdote)}>vote</button>
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 

@@ -1,0 +1,74 @@
+{
+  "anecdotes": [
+    {
+      "content": "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.",
+      "id": "36975",
+      "votes": 75
+    },
+    {
+      "content": "Premature optimization is the root of all evil.",
+      "id": "25170",
+      "votes": 57
+    },
+    {
+      "content": "Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.",
+      "id": "98312",
+      "votes": 0
+    },
+    {
+      "id": "9fe9",
+      "content": "asd",
+      "votes": 2
+    },
+    {
+      "id": "7cb0",
+      "content": "asd",
+      "votes": 26
+    },
+    {
+      "id": "633f",
+      "content": "moikka",
+      "votes": 19
+    },
+    {
+      "id": "3dff",
+      "content": "123",
+      "votes": 1
+    },
+    {
+      "id": "b307",
+      "content": "123",
+      "votes": 1
+    },
+    {
+      "id": "7185",
+      "content": "se",
+      "votes": 1
+    },
+    {
+      "id": "07e9",
+      "content": "123",
+      "votes": 1
+    },
+    {
+      "id": "301c",
+      "content": "moi",
+      "votes": 1
+    },
+    {
+      "id": "5a06",
+      "content": "asd",
+      "votes": 0
+    },
+    {
+      "id": "57a4",
+      "content": "asd",
+      "votes": 0
+    },
+    {
+      "id": "aee7",
+      "content": "asd",
+      "votes": 0
+    }
+  ]
+}

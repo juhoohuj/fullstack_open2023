@@ -6,6 +6,8 @@ import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
+import { useDispatch } from 'react-redux'
+import { showTemporaryNotification } from './reducers/notificationReducer'
 
 const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   if (!isLoggedIn) {
@@ -31,10 +33,10 @@ const App = () => {
   const [loggedInUser, setLoggedInUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [noti, setNoti] = useState(null)
-  const [notiColor, setNotiColor] = useState(null)
 
   const blogFormRef = useRef()
+
+  const dispatch = useDispatch()
 
   function sortBlogs(blogs) {
     const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
@@ -68,21 +70,12 @@ const App = () => {
 
       setLoggedInUser(user)
       blogService.setToken(user.token)
-      setNoti(`Logged in as ${user.username}`)
-      setNotiColor('green')
-      setTimeout(() => {
-        setNoti(null)
-      }, 5000)
-
+      dispatch(showTemporaryNotification('Logged in', 'green'))
       setUsername('')
       setPassword('')
     } catch (exception) {
       console.log('exception', exception)
-      setNoti('Wrong username or password')
-      setNotiColor('red')
-      setTimeout(() => {
-        setNoti(null)
-      }, 5000)
+      dispatch(showTemporaryNotification('Wrong credentials', 'red'))
     }
   }
 
@@ -91,11 +84,7 @@ const App = () => {
     window.localStorage.removeItem('loggedBloglistUser')
     setLoggedInUser(null)
     blogService.setToken(null)
-    setNoti('Logged out')
-    setNotiColor('green')
-    setTimeout(() => {
-      setNoti(null)
-    }, 5000)
+    dispatch(showTemporaryNotification('Logged out', 'green'))
   }
 
   //create blog
@@ -106,18 +95,10 @@ const App = () => {
       console.log('blogObject', blogObject)
       const updatedBlogs = await blogService.getAll()
       sortBlogs(updatedBlogs)
-      setNoti(`a new blog ${blogObject.title} by ${blogObject.author} added`)
-      setNotiColor('green')
-      setTimeout(() => {
-        setNoti(null)
-      }, 5000)
+      dispatch(showTemporaryNotification('Blog created', 'green'))
     } catch (exception) {
       console.log('exception', exception)
-      setNoti('Error creating blog')
-      setNotiColor('red')
-      setTimeout(() => {
-        setNoti(null)
-      }, 5000)
+      dispatch(showTemporaryNotification('Failed to create blog', 'red'))
     }
   }
 
@@ -151,7 +132,7 @@ const App = () => {
   return (
     <div>
       <div>
-        <Notification message={noti} noticolor={notiColor} />
+        <Notification />
         <LoginForm
           handleLogin={handleLogin}
           isLoggedIn={loggedInUser !== null}

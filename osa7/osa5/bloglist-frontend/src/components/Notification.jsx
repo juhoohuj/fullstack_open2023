@@ -1,9 +1,8 @@
+import { connect } from 'react-redux'
 
-
-const Notification = ({ message, noticolor }) => {
-
+const Notification = ({ message, color }) => {
   const notification = {
-    color: noticolor,
+    color: color,
     background: 'lightgrey',
     fontSize: 20,
     borderStyle: 'solid',
@@ -23,5 +22,11 @@ const Notification = ({ message, noticolor }) => {
   )
 }
 
+const mapStateToProps = (state) => {
+  return {
+    message: state.notification.message,
+    color: state.notification.color
+  }
+}
 
-export default Notification
+export default connect(mapStateToProps)(Notification)

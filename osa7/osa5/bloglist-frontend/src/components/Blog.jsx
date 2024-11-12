@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateBlog, deleteBlog } from '../reducers/blogReducer'
+import { Link } from 'react-router-dom'
 
 const Blog = ({ blog }) => {
 
@@ -18,7 +19,8 @@ const Blog = ({ blog }) => {
     borderWidth: 1,
     marginBottom: 5,
     borderRadius: 5,
-    background: 'lightgrey'
+    background: 'lightgrey',
+    padding: 10,
   }
 
   const likeHandler = () => {
@@ -41,17 +43,9 @@ const Blog = ({ blog }) => {
   return(
     <div className='blog' style={blogStyle}>
       <div style={hideWhenVisible}>
-        <p>Blog {blog.title} by {blog.author}</p>
-        <button onClick={() => setVisible(true)}>view</button>
-      </div>
-      <div style={showWhenVisible}>
-        <p>Title: {blog.title}</p>
-        <p>Author: {blog.author}</p>
-        <p>Url: {blog.url}</p>
-        <p>Likes: {blog.likes} <button onClick={likeHandler}>Like </button></p>
-        <p>Added by: {blog.user.name}</p>
-        <button onClick={deleteHandler}>Delete</button>
-        <button onClick={() => setVisible(false)}>hide</button>
+        <Link to={`/blogs/${blog.id}`}>
+          {blog.title} {blog.author}
+        </Link>
       </div>
     </div>
   )

@@ -6,8 +6,10 @@ import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { showTemporaryNotification } from './reducers/notificationReducer'
+import { initializeBlogs, createBlog } from './reducers/blogReducer'
+
 
 const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   if (!isLoggedIn) {
@@ -29,19 +31,20 @@ const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
 }
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [loggedInUser, setLoggedInUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+
+  const blogs = useSelector(state => state.blogs)
 
   const blogFormRef = useRef()
 
   const dispatch = useDispatch()
 
-  function sortBlogs(blogs) {
-    const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
-    setBlogs(sortedBlogs)
-  }
+
+  useEffect(() => {
+    dispatch(initializeBlogs())
+  }, [dispatch])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser')
@@ -87,18 +90,13 @@ const App = () => {
     dispatch(showTemporaryNotification('Logged out', 'green'))
   }
 
-  //create blog
-  const handleCreateBlog = async (blogObject) => {
+  const addBlog = async (blogObject) => {
     try {
-      await blogService.create(blogObject)
       blogFormRef.current.toggleVisibility()
-      console.log('blogObject', blogObject)
-      const updatedBlogs = await blogService.getAll()
-      sortBlogs(updatedBlogs)
-      dispatch(showTemporaryNotification('Blog created', 'green'))
+      dispatch(createBlog(blogObject))
+      dispatch(showTemporaryNotification(`Added ${blogObject.title}`, 'green'))
     } catch (exception) {
-      console.log('exception', exception)
-      dispatch(showTemporaryNotification('Failed to create blog', 'red'))
+      dispatch(showTemporaryNotification('Error creating blog', 'red'))
     }
   }
 
@@ -163,7 +161,7 @@ const App = () => {
       <div>
         <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
           <BlogForm
-            fn={handleCreateBlog}
+            fn={addBlog}
             isLoggedIn={loggedInUser !== null}
             user={loggedInUser}
           />

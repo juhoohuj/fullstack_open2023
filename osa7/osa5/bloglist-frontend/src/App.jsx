@@ -103,31 +103,6 @@ const App = () => {
     }
   }
 
-  const handleLike = async (blogId) => {
-    try {
-      const blog = blogs.find((blog) => blog.id === blogId)
-      const updatedBlog = {
-        ...blog,
-        likes: blog.likes + 1,
-        user: blog.user.id,
-      }
-      dispatch(updateBlog(blogId, updatedBlog))
-    } catch (exception) {
-      dispatch(showTemporaryNotification('Error updating blog', 'red'))
-    }
-  }
-
-  const handleDelete = async (blogId) => {
-    const blog = blogs.find((blog) => blog.id === blogId)
-    if (window.confirm(`Delete ${blog.title} by ${blog.author}?`)) {
-      try {
-        dispatch(deleteBlog(blogId))
-        dispatch(showTemporaryNotification(`Deleted ${blog.title}`, 'green'))
-      } catch (exception) {
-        dispatch(showTemporaryNotification('Error deleting blog', 'red'))
-      }
-    }
-  }
 
   return (
     <div>
@@ -155,8 +130,8 @@ const App = () => {
         <Blogs
           isLoggedIn={loggedInUser !== null}
           blogs={blogs}
-          handleLike={handleLike}
-          handleDelete={handleDelete}
+          handleLike={(id, blog) => dispatch(updateBlog(id, blog))}
+          handleDelete={(id) => dispatch(deleteBlog(id))}
         />
       </div>
 

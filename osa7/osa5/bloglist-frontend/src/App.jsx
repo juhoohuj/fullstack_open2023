@@ -13,6 +13,7 @@ import {
   updateBlog,
   deleteBlog,
 } from './reducers/blogReducer'
+import { initializeUser, logoutUser } from './reducers/userReducer'
 
 const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   if (!isLoggedIn) {
@@ -34,91 +35,39 @@ const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
 }
 
 const App = () => {
-  const [loggedInUser, setLoggedInUser] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-
-  const blogs = useSelector((state) => state.blogs)
-
-  const blogFormRef = useRef()
-
+  const user = useSelector(state => state.user)
+  const blogs = useSelector(state => state.blogs)
   const dispatch = useDispatch()
+  const blogFormRef = useRef()
 
   useEffect(() => {
     dispatch(initializeBlogs())
+    dispatch(initializeUser())
   }, [dispatch])
 
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setLoggedInUser(user)
-      blogService.setToken(user.token)
-    }
-  }, [])
-
-  useEffect(() => {
-    blogService.getAll().then((blogs) => sortBlogs(blogs))
-  }, [loggedInUser])
-
-  //login
-  const handleLogin = async (event) => {
-    event.preventDefault()
-
-    try {
-      const user = await loginService.login({
-        username,
-        password,
-      })
-
-      window.localStorage.setItem('loggedBloglistUser', JSON.stringify(user))
-
-      setLoggedInUser(user)
-      blogService.setToken(user.token)
-      dispatch(showTemporaryNotification('Logged in', 'green'))
-      setUsername('')
-      setPassword('')
-    } catch (exception) {
-      console.log('exception', exception)
-      dispatch(showTemporaryNotification('Wrong credentials', 'red'))
-    }
-  }
-
-  //logout
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBloglistUser')
-    setLoggedInUser(null)
-    blogService.setToken(null)
+    dispatch(logoutUser())
     dispatch(showTemporaryNotification('Logged out', 'green'))
   }
-
-
 
   return (
     <div>
       <div>
         <Notification />
-        <LoginForm
-          handleLogin={handleLogin}
-          isLoggedIn={loggedInUser !== null}
-          username={username}
-          password={password}
-          setUsername={setUsername}
-          setPassword={setPassword}
-        />
+        <LoginForm isLoggedIn={user !== null} />
       </div>
       <div>
         <h2>blogs</h2>
         <p>
-          {loggedInUser !== null && (
+          {user !== null && (
             <span>
-              {loggedInUser.name} logged in{' '}
+              {user.name} logged in{' '}
               <button onClick={handleLogout}>Logout</button>
             </span>
           )}
         </p>
         <Blogs
-          isLoggedIn={loggedInUser !== null}
+          isLoggedIn={user !== null}
           blogs={blogs}
           handleLike={(id, blog) => dispatch(updateBlog(id, blog))}
           handleDelete={(id) => dispatch(deleteBlog(id))}
@@ -128,8 +77,8 @@ const App = () => {
       <div>
         <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
           <BlogForm
-            isLoggedIn={loggedInUser !== null}
-            user={loggedInUser}
+            isLoggedIn={user !== null}
+            user={user}
           />
         </Togglable>
       </div>

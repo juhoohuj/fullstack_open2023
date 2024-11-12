@@ -1,16 +1,35 @@
+import { useDispatch } from 'react-redux'
+import { loginUser } from '../reducers/userReducer'
+import { showTemporaryNotification } from '../reducers/notificationReducer'
 import PropTypes from 'prop-types'
+import React, { useState } from 'react'
 
+const LoginForm = ({ isLoggedIn }) => {
+  const dispatch = useDispatch()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
 
-const LoginForm = ({ handleLogin, isLoggedIn, username, password, setUsername, setPassword }) => {
+  const handleLogin = async (event) => {
+    event.preventDefault()
+    const success = await dispatch(loginUser({ username, password }))
+    if (success) {
+      dispatch(showTemporaryNotification('Logged in', 'green'))
+      setUsername('')
+      setPassword('')
+    } else {
+      dispatch(showTemporaryNotification('Wrong credentials', 'red'))
+    }
+  }
+
   if (isLoggedIn) {
-    return null // Don't render the login form if the user is logged in
+    return null
   }
 
   return (
     <form onSubmit={handleLogin}>
       <h2>Login</h2>
       <div>
-          username
+        username
         <input
           type="text"
           id='username'
@@ -20,7 +39,7 @@ const LoginForm = ({ handleLogin, isLoggedIn, username, password, setUsername, s
         />
       </div>
       <div>
-          password
+        password
         <input
           type="password"
           id='password'
@@ -35,12 +54,7 @@ const LoginForm = ({ handleLogin, isLoggedIn, username, password, setUsername, s
 }
 
 LoginForm.propTypes = {
-  handleLogin: PropTypes.func.isRequired,
-  isLoggedIn: PropTypes.bool.isRequired,
-  username: PropTypes.string.isRequired,
-  password: PropTypes.string.isRequired,
-  setUsername: PropTypes.func.isRequired,
-  setPassword: PropTypes.func.isRequired,
+  isLoggedIn: PropTypes.bool.isRequired
 }
 
 export default LoginForm

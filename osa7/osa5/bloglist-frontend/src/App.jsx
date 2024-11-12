@@ -8,8 +8,12 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import { useDispatch, useSelector } from 'react-redux'
 import { showTemporaryNotification } from './reducers/notificationReducer'
-import { initializeBlogs, createBlog } from './reducers/blogReducer'
-
+import {
+  initializeBlogs,
+  createBlog,
+  updateBlog,
+  deleteBlog,
+} from './reducers/blogReducer'
 
 const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   if (!isLoggedIn) {
@@ -35,12 +39,11 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  const blogs = useSelector(state => state.blogs)
+  const blogs = useSelector((state) => state.blogs)
 
   const blogFormRef = useRef()
 
   const dispatch = useDispatch()
-
 
   useEffect(() => {
     dispatch(initializeBlogs())
@@ -101,28 +104,27 @@ const App = () => {
   }
 
   const handleLike = async (blogId) => {
-    const blog = blogs.find((blog) => blog.id === blogId)
-    const updatedBlog = { ...blog, likes: blog.likes + 1 }
-
     try {
-      await blogService.update(blogId, updatedBlog)
-      const updatedBlogs = await blogService.getAll()
-      sortBlogs(updatedBlogs)
+      const blog = blogs.find((blog) => blog.id === blogId)
+      const updatedBlog = {
+        ...blog,
+        likes: blog.likes + 1,
+        user: blog.user.id,
+      }
+      dispatch(updateBlog(blogId, updatedBlog))
     } catch (exception) {
-      console.log('exception', exception)
+      dispatch(showTemporaryNotification('Error updating blog', 'red'))
     }
   }
 
   const handleDelete = async (blogId) => {
     const blog = blogs.find((blog) => blog.id === blogId)
-    const result = window.confirm(`Delete ${blog.title} by ${blog.author}?`)
-    if (result) {
+    if (window.confirm(`Delete ${blog.title} by ${blog.author}?`)) {
       try {
-        await blogService.deleteOne(blogId)
-        const updatedBlogs = await blogService.getAll()
-        sortBlogs(updatedBlogs)
+        dispatch(deleteBlog(blogId))
+        dispatch(showTemporaryNotification(`Deleted ${blog.title}`, 'green'))
       } catch (exception) {
-        console.log('exception', exception)
+        dispatch(showTemporaryNotification('Error deleting blog', 'red'))
       }
     }
   }

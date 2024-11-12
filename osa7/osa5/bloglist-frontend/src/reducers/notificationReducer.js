@@ -3,7 +3,6 @@ const initialState = {
   color: 'green'
 }
 
-// Action Creators
 export const setNotification = (message, color) => ({
   type: 'SET_NOTIFICATION',
   payload: { message, color }
@@ -22,7 +21,6 @@ export const showTemporaryNotification = (message, color, duration = 5) => {
   }
 }
 
-// Reducer
 const notificationReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SET_NOTIFICATION':

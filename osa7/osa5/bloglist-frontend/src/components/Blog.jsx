@@ -1,27 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useDispatch } from 'react-redux'
 import { updateBlog, deleteBlog } from '../reducers/blogReducer'
 import { Link } from 'react-router-dom'
+import { Card, CardContent, Typography, Button, Link as MuiLink } from '@mui/material'
 
 const Blog = ({ blog }) => {
-
-  const [visible, setVisible] = useState(false)
-
   const dispatch = useDispatch()
-
-  const hideWhenVisible = { display: visible ? 'none' : '' }
-  const showWhenVisible = { display: visible ? '' : 'none' }
-
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
-    borderRadius: 5,
-    background: 'lightgrey',
-    padding: 10,
-  }
 
   const likeHandler = () => {
     const updatedBlog = {
@@ -32,22 +16,21 @@ const Blog = ({ blog }) => {
     dispatch(updateBlog(blog.id, updatedBlog))
   }
 
-  const deleteHandler = () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      dispatch(deleteBlog(blog.id))
-    }
-  }
-
-
-
-  return(
-    <div className='blog' style={blogStyle}>
-      <div style={hideWhenVisible}>
-        <Link to={`/blogs/${blog.id}`}>
-          {blog.title} {blog.author}
-        </Link>
-      </div>
-    </div>
+  return (
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6">
+          <MuiLink 
+            component={Link} 
+            to={`/blogs/${blog.id}`}
+            sx={{ textDecoration: 'none' }}
+          >
+            {blog.title} by {blog.author}
+          </MuiLink>
+        </Typography>
+      </CardContent>
+    </Card>
   )
 }
+
 export default Blog

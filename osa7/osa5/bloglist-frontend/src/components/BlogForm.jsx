@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { createBlog } from '../reducers/blogReducer'
 import { showTemporaryNotification } from '../reducers/notificationReducer'
+import { TextField, Button, Box, Typography } from '@mui/material'
 
 const BlogForm = ({ isLoggedIn, user }) => {
   const dispatch = useDispatch()
@@ -12,12 +13,14 @@ const BlogForm = ({ isLoggedIn, user }) => {
   const addBlog = (event) => {
     event.preventDefault()
     try {
-      dispatch(createBlog({
-        title,
-        author,
-        url,
-        user: user.id
-      }))
+      dispatch(
+        createBlog({
+          title,
+          author,
+          url,
+          user: user.id,
+        })
+      )
       dispatch(showTemporaryNotification(`Added ${title}`, 'green'))
       setTitle('')
       setAuthor('')
@@ -27,49 +30,46 @@ const BlogForm = ({ isLoggedIn, user }) => {
     }
   }
 
-
-
   if (!isLoggedIn) {
     return null
   }
 
   return (
-    <form onSubmit={addBlog}>
-      <h2>Create new</h2>
-      <div>
-        <div>
-          <label htmlFor="title">title:</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            name="Title"
-            onChange={({ target }) => setTitle(target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="author">author:</label>
-          <input
-            type="text"
-            id="author"
-            value={author}
-            name="Author"
-            onChange={({ target }) => setAuthor(target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="url">url:</label>
-          <input
-            type="text"
-            id="url"
-            value={url}
-            name="Url"
-            onChange={({ target }) => setUrl(target.value)}
-          />
-        </div>
-      </div>
-      <button id='create-button' type="submit">create</button>
-    </form>
+    <Box component="form" onSubmit={addBlog} sx={{ mt: 2 }}>
+      <Typography variant="h5">Create new</Typography>
+      <TextField
+        fullWidth
+        margin="normal"
+        label="Title"
+        id="title"
+        value={title}
+        onChange={({ target }) => setTitle(target.value)}
+      />
+      <TextField
+        fullWidth
+        margin="normal"
+        label="Author"
+        id="author"
+        value={author}
+        onChange={({ target }) => setAuthor(target.value)}
+      />
+      <TextField
+        fullWidth
+        margin="normal"
+        label="URL"
+        id="url"
+        value={url}
+        onChange={({ target }) => setUrl(target.value)}
+      />
+      <Button
+        variant="contained"
+        type="submit"
+        id="create-button"
+        sx={{ mt: 2 }}
+      >
+        Create
+      </Button>
+    </Box>
   )
 }
 

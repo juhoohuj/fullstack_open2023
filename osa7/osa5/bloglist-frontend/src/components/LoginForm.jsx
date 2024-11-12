@@ -3,6 +3,7 @@ import { loginUser } from '../reducers/userReducer'
 import { showTemporaryNotification } from '../reducers/notificationReducer'
 import PropTypes from 'prop-types'
 import React, { useState } from 'react'
+import { TextField, Button, Box, Typography } from '@mui/material'
 
 const LoginForm = ({ isLoggedIn }) => {
   const dispatch = useDispatch()
@@ -26,35 +27,39 @@ const LoginForm = ({ isLoggedIn }) => {
   }
 
   return (
-    <form onSubmit={handleLogin}>
-      <h2>Login</h2>
-      <div>
-        username
-        <input
-          type="text"
-          id='username'
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          id='password'
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit" id='login-button'>login</button>
-    </form>
+    <Box component="form" onSubmit={handleLogin} sx={{ mt: 2 }}>
+      <Typography variant="h5">Login</Typography>
+      <TextField
+        fullWidth
+        margin="normal"
+        label="Username"
+        id="username"
+        value={username}
+        onChange={({ target }) => setUsername(target.value)}
+      />
+      <TextField
+        fullWidth
+        margin="normal"
+        type="password"
+        label="Password"
+        id="password"
+        value={password}
+        onChange={({ target }) => setPassword(target.value)}
+      />
+      <Button
+        variant="contained"
+        type="submit"
+        id="login-button"
+        sx={{ mt: 2 }}
+      >
+        Login
+      </Button>
+    </Box>
   )
 }
 
 LoginForm.propTypes = {
-  isLoggedIn: PropTypes.bool.isRequired
+  isLoggedIn: PropTypes.bool.isRequired,
 }
 
 export default LoginForm

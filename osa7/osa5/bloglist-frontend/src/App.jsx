@@ -12,6 +12,17 @@ import BlogListing from './components/BlogListing'
 import UserPage from './components/UserPage'
 import SingleBlogPage from './components/SingleBlogPage'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import {
+  Container,
+  Button,
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+} from '@mui/material'
+import { ThemeProvider, createTheme } from '@mui/material'
+
+const theme = createTheme()
 
 const Blogs = ({ isLoggedIn, blogs, handleLike, handleDelete }) => {
   if (!isLoggedIn) {
@@ -49,47 +60,77 @@ const App = () => {
   }
 
   return (
-    <Router>
-      <div>
-        <div>
-          <Notification />
-          <LoginForm isLoggedIn={user !== null} />
-        </div>
+    <ThemeProvider theme={theme}>
+      <Router>
+        <Container>
+          <Box>
+            <Notification />
+          </Box>
 
-        <nav>
-          <Link to="/">Blogs</Link> | <Link to="/users">Users</Link>
-          {user !== null && (
-            <span>
-              | {user.name} logged in{' '}
-              <button onClick={handleLogout}>Logout</button>
-            </span>
-          )}
-        </nav>
+          <AppBar position="static">
+            <Toolbar>
+              <Button color="inherit" component={Link} to="/">
+                Blogs
+              </Button>
+              <Button color="inherit" component={Link} to="/users">
+                Users
+              </Button>
+              {user !== null && (
+                <>
+                  <Typography sx={{ flexGrow: 1 }}>
+                    {user.name} logged in
+                  </Typography>
+                  <Button color="inherit" onClick={handleLogout}>
+                    Logout
+                  </Button>
+                </>
+              )}
+            </Toolbar>
+          </AppBar>
 
-        <Routes>
-          <Route path="/users" element={<BlogListing />} />
-          <Route path="/users/:id" element={<UserPage />} />
-          <Route path="/blogs/:id" element={<SingleBlogPage />} />
-          <Route
-            path="/"
-            element={
-              <div>
-                <h2>blogs</h2>
-                <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
-                  <BlogForm isLoggedIn={user !== null} user={user} />
-                </Togglable>
-                <Blogs
-                  isLoggedIn={user !== null}
-                  blogs={blogs}
-                  handleLike={(id, blog) => dispatch(updateBlog(id, blog))}
-                  handleDelete={(id) => dispatch(deleteBlog(id))}
-                />
-              </div>
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+          <Routes>
+            <Route path="/users" element={<BlogListing />} />
+            <Route path="/users/:id" element={<UserPage />} />
+            <Route path="/blogs/:id" element={<SingleBlogPage />} />
+            <Route
+              path="/"
+              element={
+                <Box>
+                  <LoginForm isLoggedIn={user !== null} />
+                  <Togglable buttonLabel="new blog" ref={blogFormRef}>
+                    <BlogForm
+                      isLoggedIn={user !== null}
+                      user={user}
+                      blogFormRef={blogFormRef}
+                    />
+                  </Togglable>
+                  <Blogs
+                    isLoggedIn={user !== null}
+                    blogs={blogs}
+                    handleLike={(blog) => {
+                      const updatedBlog = {
+                        ...blog,
+                        likes: blog.likes + 1,
+                      }
+                      dispatch(updateBlog(blog.id, updatedBlog))
+                    }}
+                    handleDelete={(blog) => {
+                      if (
+                        window.confirm(
+                          `Remove blog ${blog.title} by ${blog.author}`
+                        )
+                      ) {
+                        dispatch(deleteBlog(blog.id))
+                      }
+                    }}
+                  />
+                </Box>
+              }
+            />
+          </Routes>
+        </Container>
+      </Router>
+    </ThemeProvider>
   )
 }
 

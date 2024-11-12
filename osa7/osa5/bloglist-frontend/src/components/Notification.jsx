@@ -1,4 +1,5 @@
 import { connect } from 'react-redux'
+import { Alert } from '@mui/material'
 
 const Notification = ({ message, color }) => {
   const notification = {
@@ -8,7 +9,7 @@ const Notification = ({ message, color }) => {
     borderStyle: 'solid',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 10
+    marginBottom: 10,
   }
 
   if (message === null) {
@@ -16,16 +17,16 @@ const Notification = ({ message, color }) => {
   }
 
   return (
-    <div style={notification}>
+    <Alert severity={color === 'green' ? 'success' : 'error'} sx={{ mb: 2 }}>
       {message}
-    </div>
+    </Alert>
   )
 }
 
 const mapStateToProps = (state) => {
   return {
     message: state.notification.message,
-    color: state.notification.color
+    color: state.notification.color,
   }
 }
 

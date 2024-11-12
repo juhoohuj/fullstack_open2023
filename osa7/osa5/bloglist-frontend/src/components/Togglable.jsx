@@ -1,6 +1,6 @@
 import React, { useState, useImperativeHandle, forwardRef } from 'react'
+import { Box, Button } from '@mui/material'
 
-// eslint-disable-next-line react/display-name
 const Togglable = forwardRef((props, ref) => {
   const [visible, setVisible] = useState(false)
 
@@ -15,15 +15,28 @@ const Togglable = forwardRef((props, ref) => {
   })
 
   return (
-    <div>
-      <div style={{ display: visible ? 'none' : '' }}>
-        <button onClick={toggleVisibility}>{props.buttonLabel}</button>
-      </div>
-      <div style={{ display: visible ? '' : 'none' }}>
+    <Box sx={{ mt: 2, mb: 2 }}>
+      <Box sx={{ display: visible ? 'none' : 'block' }}>
+        <Button 
+          variant="contained" 
+          onClick={toggleVisibility}
+          size="small"
+        >
+          {props.buttonLabel}
+        </Button>
+      </Box>
+      <Box sx={{ display: visible ? 'block' : 'none' }}>
         {props.children}
-        <button onClick={toggleVisibility}>Cancel</button>
-      </div>
-    </div>
+        <Button 
+          variant="outlined"
+          onClick={toggleVisibility}
+          size="small"
+          sx={{ mt: 1 }}
+        >
+          Cancel
+        </Button>
+      </Box>
+    </Box>
   )
 })
 

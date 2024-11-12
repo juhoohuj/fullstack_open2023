@@ -89,7 +89,7 @@ blogsRouter.get('/', async (request, response) => {
 
   blogsRouter.put('/:id', async (request, response) => {
     try {
-      const { title, author, url, likes } = request.body;
+      const { title, author, url, likes, comments } = request.body;
   
       if (!title || !url) {
         return response.status(400).json({ error: 'Title and URL are required.' });
@@ -97,7 +97,7 @@ blogsRouter.get('/', async (request, response) => {
   
       const blog = await Blog.findByIdAndUpdate(
         request.params.id,
-        { title, author, url, likes },
+        { title, author, url, likes, comments },
         { new: true }
       );
   
@@ -108,6 +108,50 @@ blogsRouter.get('/', async (request, response) => {
       response.json(blog);
     } catch (error) {
       response.status(500).json({ error: 'Internal Server Error' });
+    }
+  })
+
+  blogsRouter.post('/:id/comments', async (request, response) => {
+    try {
+      const { content } = request.body
+  
+      if (!content) {
+        return response.status(400).json({ error: 'Comment content is required' })
+      }
+  
+      const blog = await Blog.findById(request.params.id)
+      if (!blog) {
+        return response.status(404).json({ error: 'Blog not found' })
+      }
+  
+      blog.comments = blog.comments.concat({ content })
+      const updatedBlog = await blog.save()
+  
+      response.status(201).json(updatedBlog)
+    } catch (error) {
+      response.status(500).json({ error: 'Internal Server Error' })
+    }
+  })
+  
+  
+  blogsRouter.get('/', async (request, response) => {
+    const blogs = await Blog.find({})
+      .populate('user', { username: 1, name: 1 })
+    response.json(blogs)
+  })
+  
+  blogsRouter.get('/:id', async (request, response) => {
+    try {
+      const blog = await Blog.findById(request.params.id)
+        .populate('user', { username: 1, name: 1 })
+      
+      if (blog) {
+        response.json(blog)
+      } else {
+        response.status(404).end()
+      }
+    } catch (error) {
+      response.status(400).json({ error: 'malformatted id' })
     }
   })
 

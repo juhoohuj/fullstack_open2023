@@ -1,27 +1,30 @@
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { createBlog } from '../reducers/blogReducer'
+import { showTemporaryNotification } from '../reducers/notificationReducer'
 
-
-
-const BlogForm = ({ isLoggedIn, fn, user }) => {
-
+const BlogForm = ({ isLoggedIn, user }) => {
+  const dispatch = useDispatch()
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
   const addBlog = (event) => {
     event.preventDefault()
-
-    fn({
-      title: title,
-      author: author,
-      url: url,
-      user: user.id
-    })
-
-
-    setTitle('')
-    setAuthor('')
-    setUrl('')
+    try {
+      dispatch(createBlog({
+        title,
+        author,
+        url,
+        user: user.id
+      }))
+      dispatch(showTemporaryNotification(`Added ${title}`, 'green'))
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+    } catch (error) {
+      dispatch(showTemporaryNotification('Error creating blog', 'red'))
+    }
   }
 
 

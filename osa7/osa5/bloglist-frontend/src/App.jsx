@@ -10,7 +10,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { showTemporaryNotification } from './reducers/notificationReducer'
 import {
   initializeBlogs,
-  createBlog,
   updateBlog,
   deleteBlog,
 } from './reducers/blogReducer'
@@ -93,15 +92,6 @@ const App = () => {
     dispatch(showTemporaryNotification('Logged out', 'green'))
   }
 
-  const addBlog = async (blogObject) => {
-    try {
-      blogFormRef.current.toggleVisibility()
-      dispatch(createBlog(blogObject))
-      dispatch(showTemporaryNotification(`Added ${blogObject.title}`, 'green'))
-    } catch (exception) {
-      dispatch(showTemporaryNotification('Error creating blog', 'red'))
-    }
-  }
 
 
   return (
@@ -138,7 +128,6 @@ const App = () => {
       <div>
         <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
           <BlogForm
-            fn={addBlog}
             isLoggedIn={loggedInUser !== null}
             user={loggedInUser}
           />
